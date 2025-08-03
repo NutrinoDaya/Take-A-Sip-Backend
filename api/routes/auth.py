@@ -1,17 +1,17 @@
 # app/api/routes/auth.py
 import logging
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
 from pymongo.errors import DuplicateKeyError
 
-from core.security import create_access_token, get_password_hash, verify_password
+from core.security import create_access_token, verify_password, get_password_hash
 from db.database import db
 from models.token import Token
-from models.user import UserCreate, UserViewModel
+from models.user import UserCreate, UserViewModel, UserLogin
 from api.deps import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+# ... /register endpoint is correct ...
 @router.post("/register", response_model=UserViewModel, status_code=status.HTTP_201_CREATED)
 async def register(user: UserCreate):
     hashed_password = get_password_hash(user.password)
@@ -25,10 +25,13 @@ async def register(user: UserCreate):
         logging.warning(f"Registration attempt with existing email: {user.email}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
+
+# --- THIS IS THE UPDATED LOGIN FUNCTION ---
 @router.post("/login", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await db.users.find_one({"email": form_data.username})
-    if not user or not verify_password(form_data.password, user["hashed_password"]):
+async def login(credentials: UserLogin): # Changed from form_data to use the UserLogin model
+    # Access credentials via the Pydantic model
+    user = await db.users.find_one({"email": credentials.email})
+    if not user or not verify_password(credentials.password, user["hashed_password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -37,6 +40,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     access_token = create_access_token(data={"sub": user["email"]})
     return {"access_token": access_token, "token_type": "bearer"}
     
+# ... /me endpoint is correct ...
 @router.get("/me")
 async def read_users_me(current_user: UserViewModel = Depends(get_current_user)):
     return {

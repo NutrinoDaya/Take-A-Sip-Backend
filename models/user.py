@@ -32,3 +32,10 @@ class UserViewModel(BaseModel):
     id: str = Field(alias="_id")
     email: str
     user_type: str
+
+
+# ADD THIS NEW MODEL FOR LOGIN
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
