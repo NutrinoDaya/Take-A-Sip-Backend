@@ -6,7 +6,7 @@ from pymongo.errors import DuplicateKeyError
 from core.security import create_access_token, verify_password, get_password_hash
 from db.database import db
 from models.token import Token
-from models.user import UserCreate, UserViewModel, UserLogin
+from models.user import UserCreate, UserViewModel, UserLogin, UserInDB
 from api.deps import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -40,9 +40,9 @@ async def login(credentials: UserLogin): # Changed from form_data to use the Use
     access_token = create_access_token(data={"sub": user["email"]})
     return {"access_token": access_token, "token_type": "bearer"}
     
-# ... /me endpoint is correct ...
 @router.get("/me")
-async def read_users_me(current_user: UserViewModel = Depends(get_current_user)):
+# Change UserViewModel to UserInDB to match the dependency's return type
+async def read_users_me(current_user: UserInDB = Depends(get_current_user)):
     return {
         "uid": str(current_user.id),
         "email": current_user.email,
