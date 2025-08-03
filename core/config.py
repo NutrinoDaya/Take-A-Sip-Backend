@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # For Render, set this in your environment variables.
-    MONGO_DETAILS: str = os.getenv("MONGO_DETAILS", "mongodb://localhost:27017")
+    MONGO_DETAILS: str = os.getenv("MONGO_DETAILS", "mongodb+srv://grad_project_632:workout123456789@cluster0.wo9llcy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
     DATABASE_NAME: str = "caffe_app"
     
     # For Render, generate a strong secret and set it as an environment variable.
