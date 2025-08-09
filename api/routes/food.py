@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import APIRouter, Depends, UploadFile, File, Form
-import cloudinary.uploader # We only need the uploader now
+import cloudinary.uploader
 
 from api.deps import get_current_admin
 from db.database import db
@@ -8,7 +8,6 @@ from models.food import FoodItem, Image
 
 router = APIRouter(prefix="/food", tags=["Food Items"])
 
-# The configuration block has been REMOVED from here
 
 @router.get("/", response_model=List[FoodItem])
 async def get_food_items():
@@ -17,11 +16,13 @@ async def get_food_items():
         item["_id"] = str(item["_id"])
     return items
 
+
 @router.post("/add", response_model=FoodItem, dependencies=[Depends(get_current_admin)])
 async def add_food_item(
     name: str = Form(...),
     description: str = Form(...),
-    price: float = Form(...),
+    # ⭐️ FIX #1: Accept the price as a string to match the form data
+    price: str = Form(...),
     section: str = Form(...),
     file: UploadFile = File(...)
 ):
@@ -41,7 +42,8 @@ async def add_food_item(
     item_doc = {
         "name": name,
         "description": description,
-        "price": price,
+        # ⭐️ FIX #2: Convert the price string to a float before saving
+        "price": float(price),
         "section": section,
         "image": image_data.dict()
     }
