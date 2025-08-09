@@ -1,19 +1,27 @@
 # app/core/config.py
-import os
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    # For Render, set this in your environment variables.
-    MONGO_DETAILS: str = os.getenv("MONGO_DETAILS", "mongodb+srv://grad_project_632:workout123456789@cluster0.wo9llcy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+    # --- MongoDB Settings ---
+    # This MUST be set in your Render environment variables
+    MONGO_DETAILS: str 
     DATABASE_NAME: str = "caffe_app"
     
-    # For Render, generate a strong secret and set it as an environment variable.
-    # You can generate one with: openssl rand -hex 32
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "a_very_secret_key_that_should_be_changed")
+    # --- JWT Settings ---
+    # Generate a strong secret for Render: openssl rand -hex 32
+    SECRET_KEY: str = "a_very_secret_key_for_local_development"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    class Config:
-        env_file = ".env" # Optional: for local development with a .env file
+    # --- Cloudinary Settings ---
+    # These MUST be set in your Render environment variables
+    CLOUDINARY_CLOUD_NAME: str
+    CLOUDINARY_API_KEY: str
+    CLOUDINARY_API_SECRET: str
 
+    class Config:
+        # For local development, it will read from a .env file
+        env_file = ".env"
+
+# Create a single instance of settings to be used throughout the app
 settings = Settings()
