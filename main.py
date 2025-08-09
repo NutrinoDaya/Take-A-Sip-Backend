@@ -6,10 +6,8 @@ import cloudinary
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-# Import your settings object and routers
 from core.config import settings
 from api.routes import auth, food
-# Import the client and db objects from your database module
 from db.database import db, client
 
 @asynccontextmanager
@@ -25,20 +23,21 @@ async def lifespan(app: FastAPI):
     )
     logging.info("Cloudinary has been configured.")
 
-    # Create database indexes
-    if db is not None:
+    # Ping the database to verify connection
+    try:
+        await client.admin.command('ping')
+        logging.info("Successfully connected to MongoDB.")
+        # Create database indexes
         await db.users.create_index("email", unique=True)
         logging.info("Database indexes created successfully.")
-    else:
-        logging.error("Database not available, skipping index creation.")
-    
+    except Exception as e:
+        logging.critical(f"Could not connect to MongoDB during startup: {e}")
+
     yield # The application runs after this yield
-    
+
     # --- This block runs once on application shutdown ---
-    if client is not None:
-        client.close()
-        logging.info("MongoDB connection closed.")
-    logging.info("Application shutdown complete.")
+    client.close()
+    logging.info("MongoDB connection closed. Application shutdown complete.")
 
 app = FastAPI(title="Caffe App API", lifespan=lifespan)
 
