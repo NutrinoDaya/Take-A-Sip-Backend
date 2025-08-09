@@ -1,9 +1,20 @@
+# Web framework
 fastapi
 uvicorn[standard]
+
+# Database
 motor
 pymongo[srv]
+
+# Security & Authentication
 bcrypt
 passlib[bcrypt]
 python-jose[cryptography]
+
+# Configuration
 pydantic-settings
 python-dotenv
+
+# Image Upload Handling
+cloudinary
+python-multipart
